@@ -2145,6 +2145,9 @@ if(restore()){
  function hindiOf(text){return ((text||'').match(/[\u0900-\u097F][\u0900-\u097F\u0964\u0965\s'’-]*/g)||[]).join(' ').replace(/\s+/g,' ').trim()}
  function letterName(text){
   const t=String(text||'').trim();
+  if(t==='ङ')return 'अंग';
+  if(t==='ञ')return 'अञ';
+  if(t==='ण')return 'अण';
   if(/^(?:[\u0915-\u0939\u0958-\u095F][\u093C]?(?:\u094D[\u0915-\u0939\u0958-\u095F][\u093C]?)*)$/.test(t))return t+'अ';
   return t;
  }
