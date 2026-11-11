@@ -1202,19 +1202,33 @@ if(restore()){
   ids.push(PHONEME_IDS.$);
   return ids;
  }
- function pieces(text){
-  const bits=text.split(/(?<=[।!?])/).map(part=>part.trim()).filter(Boolean);
-  const out=[];
-  for(const bit of (bits.length?bits:[text])){
-   if(bit.length<=160){out.push(bit);continue}
-   let cur='';
-   for(const word of bit.split(/\s+/)){
-    if(cur&&(cur+' '+word).length>160){out.push(cur);cur=word}
-    else cur=cur?cur+' '+word:word;
+ function splitLetters(text){
+  const chars=[...text];
+  const isVowel=c=>/[\u0904-\u0914\u0960\u0961]/.test(c);
+  const isCons=c=>/[\u0915-\u0939\u0958-\u095f]/.test(c);
+  const isNukta=c=>c==='\u093c';
+  const isVirama=c=>c==='\u094d';
+  const isMatra=c=>/[\u093e-\u094c\u0962\u0963]/.test(c);
+  const isMod=c=>/[\u0900-\u0903\u0951-\u0954]/.test(c);
+  const items=[];
+  let i=0;
+  while(i<chars.length){
+   const c=chars[i];
+   if(/\s/.test(c)){if(items.length)items[items.length-1].sep='word';i++;continue}
+   if(c==='।'||c==='॥'||c==='?'||c==='!'){if(items.length)items[items.length-1].sep='stop';i++;continue}
+   if(!(isVowel(c)||isCons(c))){i++;continue}
+   let s=c;i++;
+   if(i<chars.length&&isNukta(chars[i]))s+=chars[i++];
+   while(i+1<chars.length&&isVirama(chars[i])&&(isCons(chars[i+1])||isVowel(chars[i+1]))){
+    s+=chars[i++];s+=chars[i++];
+    if(i<chars.length&&isNukta(chars[i]))s+=chars[i++];
    }
-   if(cur)out.push(cur);
+   if(i<chars.length&&isVirama(chars[i]))s+=chars[i++];
+   if(i<chars.length&&isMatra(chars[i]))s+=chars[i++];
+   while(i<chars.length&&isMod(chars[i]))s+=chars[i++];
+   items.push({text:s,sep:'letter'});
   }
-  return out.length?out:[text];
+  return items;
  }
  function syncVoice(){
   const chosen=voice();
@@ -1330,15 +1344,13 @@ if(restore()){
   })().catch(err=>{ipaReady=null;throw err});
   return ipaReady;
  }
- function clausePhonemes(getPhonemes,text){
-  const out=[];
-  for(const bit of pieces(text)){
-   for(const row of getPhonemes(bit)){
-    const ipa=(String(row.phonemes||'').replace(/\([^)]*\)/g,'')+(row.terminator||'')).normalize('NFD');
-    if([...ipa].some(ch=>PHONEME_IDS[ch]!=null&&ch!==' '))out.push(ipa);
-   }
-  }
-  return out;
+ function letterPhoneme(getPhonemes,text){
+  const bare=text.normalize('NFC').replaceAll('\u0921\u093c','\u095c').replaceAll('\u0922\u093c','\u095d');
+  if(bare==='\u095c')return 'r.ˈə';
+  if(bare==='\u095d')return 'r.hˈə';
+  const row=getPhonemes(text)[0];
+  if(!row)return '';
+  return (String(row.phonemes||'').replace(/\([^)]*\)/g,'')+(row.terminator||'')).normalize('NFD');
  }
  async function modelBytes(url){
   let cache=null;
@@ -1369,24 +1381,28 @@ if(restore()){
   const ort=globalThis.ort;
   const input=new ort.Tensor('int64',BigInt64Array.from(ids,n=>BigInt(n)),[1,ids.length]);
   const inputLengths=new ort.Tensor('int64',BigInt64Array.of(BigInt(ids.length)),[1]);
-  const lengthScale=1/Math.min(1.5,Math.max(0.6,speed||1));
+  const lengthScale=1/(Math.min(1.5,Math.max(0.6,speed||1))*0.75);
   const scales=new ort.Tensor('float32',Float32Array.of(0.667,lengthScale,0.8),[3]);
   const result=await pack.session.run({input,input_lengths:inputLengths,scales});
   const audio=result.output?.data||result[pack.session.outputNames[0]]?.data;
   return audio?Float32Array.from(audio):new Float32Array(0);
  }
  async function synthesize(pack,text,speed){
-  const pieces=[];
-  for(const ipa of clausePhonemes(pack.getPhonemes,text))pieces.push(await speakClause(pack,ipa,speed));
-  const audible=pieces.filter(part=>part.length);
-  if(!audible.length)return new Float32Array(0);
-  const gap=Math.round(0.08*pack.sampleRate);
-  const total=audible.reduce((n,part)=>n+part.length,0)+gap*Math.max(0,audible.length-1);
+  const spoken=[];
+  for(const item of splitLetters(text)){
+   const ipa=letterPhoneme(pack.getPhonemes,item.text);
+   if(!ipa||![...ipa].some(ch=>PHONEME_IDS[ch]!=null&&ch!==' '))continue;
+   const pcm=await speakClause(pack,ipa,speed);
+   if(pcm.length)spoken.push({pcm,sep:item.sep});
+  }
+  if(!spoken.length)return new Float32Array(0);
+  const gapFor=sep=>Math.round((sep==='stop'?0.36:sep==='word'?0.26:0.16)*pack.sampleRate);
+  const total=spoken.reduce((n,part,index)=>n+part.pcm.length+(index<spoken.length-1?gapFor(part.sep):0),0);
   const pcm=new Float32Array(total);
   let offset=0;
-  audible.forEach((part,index)=>{
-   pcm.set(part,offset);
-   offset+=part.length+(index<audible.length-1?gap:0);
+  spoken.forEach((part,index)=>{
+   pcm.set(part.pcm,offset);
+   offset+=part.pcm.length+(index<spoken.length-1?gapFor(part.sep):0);
   });
   return pcm;
  }
