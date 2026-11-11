@@ -1177,8 +1177,7 @@ if(restore()){
 (() => {
  const KEY='hindi-gsi-voice';
  const RATE_KEY='hindi-gsi-rate';
- const NUKTA='\u093c';
- const CONSONANTS=new Set([...'कखगघङचछजझञटठडढणतथदधनपफबभमयरलवशषसह']);
+ const NUKTA_LETTERS=[['\u0915\u093c','\u0958'],['\u0916\u093c','\u0959'],['\u0917\u093c','\u095a'],['\u091c\u093c','\u095b'],['\u0921\u093c','\u095c'],['\u0922\u093c','\u095d'],['\u092b\u093c','\u095e'],['\u092f\u093c','\u095f']];
  const SVG='<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M3 9v6h4l5 4V5L7 9H3zm11.5 3a4.5 4.5 0 0 0-2.2-3.9v7.8A4.5 4.5 0 0 0 14.5 12zM12.3 3.2v2.1a7 7 0 0 1 0 13.4v2.1a9 9 0 0 0 0-17.6z"/></svg>';
  const CONTROLS='a.brandline,.topnav a,a.btn,a.card-revise,a.card-quiz,a.side-link,button.btn,button.hindi-key,button.hindi-pad-tab,button.hindi-pad-action,button.hindi-pad-toggle,button.word-tile,button.category-tile,button.category-heading';
  const FIELDS='.hi-title,.field,.sound-vowel,.ak-cell,.conjunct-card,.number-grid > div,.examples-table > div,.example-set > p,.declension-card > div,.declension-card > h4,.visual-card,.lesson h2,.lesson h3,.lesson h4,.lesson td,.lesson th,h2.question-title,.passage,label.option,.topic-card h3,.topic-card > p,.match-row,.script-practice';
@@ -1188,16 +1187,20 @@ if(restore()){
  function rate(){const raw=localStorage.getItem(RATE_KEY);const n=Number(raw);if(raw==null||!Number.isFinite(n))return 1;return Math.min(1.5,Math.max(0.6,n))}
  function status(text){const el=document.getElementById('audioStatus');if(el)el.textContent=text||''}
  function hindiOf(text){return ((text||'').match(/[\u0900-\u097F][\u0900-\u097F\u0964\u0965\s'’-]*/g)||[]).join(' ').replace(/\s+/g,' ').trim()}
- function prepareHindi(text){
-  const chars=[...String(text||'').normalize('NFC')];
-  let out='';
-  for(let i=0;i<chars.length;i++){
-   let next=i+2;
-   if(chars[i+1]===NUKTA && chars[next]==='\u094d')next++;
-   if(chars[i+1]===NUKTA && CONSONANTS.has(chars[next])){out+=chars[i];i++;continue}
-   out+=chars[i];
-  }
-  return out.replace(/\s+/g,' ').trim();
+ function composeNukta(text){
+  let out=String(text||'');
+  for(const [from,to] of NUKTA_LETTERS)out=out.replaceAll(from,to);
+  return out;
+ }
+ async function synthesizeHindi(engine,text,opts){
+  const orig=String.prototype.normalize;
+  String.prototype.normalize=function(form){
+   const out=orig.call(this,form);
+   if(!form||String(form).toUpperCase()==='NFC')return composeNukta(out);
+   return out;
+  };
+  try{return await engine.synthesize(text,opts)}
+  finally{String.prototype.normalize=orig}
  }
  function syncVoice(){
   const chosen=voice();
@@ -1343,7 +1346,7 @@ if(restore()){
  }
  async function play(btn){
   const host=hostOf(btn);
-  const text=prepareHindi(hindiOf(plain(host)));
+  const text=hindiOf(plain(host));
   if(!text){status('Nothing to play.');return}
   if(btn.classList.contains('is-playing')||btn.classList.contains('is-loading')){stop();status('Stopped.');return}
   stop();
@@ -1368,7 +1371,7 @@ if(restore()){
   btn.removeAttribute('aria-busy');
   status('Playing.');
   try{
-   const out=await pack.engine.synthesize(text,{lang:'hi',voice:gender,rate:speed});
+   const out=await synthesizeHindi(pack.engine,text,{lang:'hi',voice:gender,rate:speed});
    if(myRun!==run)return;
    if(out.meta?.tier==='klatt_zero_dep')status('Playing the built-in Hindi voice.');
    if(out.pcm&&out.pcm.length>1)await playPcm(out.pcm,out.meta?.sampleRate||24000,myRun);
