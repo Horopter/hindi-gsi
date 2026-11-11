@@ -1332,7 +1332,8 @@ if(restore()){
  const PHONEME_IDS={" ":3,"!":4,"\"":150,"#":149,"$":2,"'":5,"(":6,")":7,",":8,"-":9,".":10,"0":130,"1":131,"2":132,"3":133,"4":134,"5":135,"6":136,"7":137,"8":138,"9":139,":":11,";":12,"?":13,"X":156,"^":1,"_":0,"a":14,"b":15,"c":16,"d":17,"e":18,"f":19,"g":154,"h":20,"i":21,"j":22,"k":23,"l":24,"m":25,"n":26,"o":27,"p":28,"q":29,"r":30,"s":31,"t":32,"u":33,"v":34,"w":35,"x":36,"y":37,"z":38,"æ":39,"ç":40,"ð":41,"ø":42,"ħ":43,"ŋ":44,"œ":45,"ǀ":46,"ǁ":47,"ǂ":48,"ǃ":49,"ɐ":50,"ɑ":51,"ɒ":52,"ɓ":53,"ɔ":54,"ɕ":55,"ɖ":56,"ɗ":57,"ɘ":58,"ə":59,"ɚ":60,"ɛ":61,"ɜ":62,"ɞ":63,"ɟ":64,"ɠ":65,"ɡ":66,"ɢ":67,"ɣ":68,"ɤ":69,"ɥ":70,"ɦ":71,"ɧ":72,"ɨ":73,"ɪ":74,"ɫ":75,"ɬ":76,"ɭ":77,"ɮ":78,"ɯ":79,"ɰ":80,"ɱ":81,"ɲ":82,"ɳ":83,"ɴ":84,"ɵ":85,"ɶ":86,"ɸ":87,"ɹ":88,"ɺ":89,"ɻ":90,"ɽ":91,"ɾ":92,"ʀ":93,"ʁ":94,"ʂ":95,"ʃ":96,"ʄ":97,"ʈ":98,"ʉ":99,"ʊ":100,"ʋ":101,"ʌ":102,"ʍ":103,"ʎ":104,"ʏ":105,"ʐ":106,"ʑ":107,"ʒ":108,"ʔ":109,"ʕ":110,"ʘ":111,"ʙ":112,"ʛ":113,"ʜ":114,"ʝ":115,"ʟ":116,"ʡ":117,"ʢ":118,"ʦ":155,"ʰ":145,"ʲ":119,"ˈ":120,"ˌ":121,"ː":122,"ˑ":123,"˞":124,"ˤ":146,"̃":141,"̧":140,"̩":144,"̪":142,"̯":143,"̺":152,"̻":153,"β":125,"ε":147,"θ":126,"χ":127,"ᵻ":128,"↑":151,"↓":148,"ⱱ":129};
  const VOICES={
   female:'https://huggingface.co/rhasspy/piper-voices/resolve/main/hi/hi_IN/priyamvada/medium/hi_IN-priyamvada-medium.onnx',
-  male:'https://huggingface.co/rhasspy/piper-voices/resolve/main/hi/hi_IN/pratham/medium/hi_IN-pratham-medium.onnx'
+  male:'https://huggingface.co/rhasspy/piper-voices/resolve/main/hi/hi_IN/pratham/medium/hi_IN-pratham-medium.onnx',
+  maleWord:'https://huggingface.co/rhasspy/piper-voices/resolve/main/hi/hi_IN/rohan/medium/hi_IN-rohan-medium.onnx'
  };
  const SVG='<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M3 9v6h4l5 4V5L7 9H3zm11.5 3a4.5 4.5 0 0 0-2.2-3.9v7.8A4.5 4.5 0 0 0 14.5 12zM12.3 3.2v2.1a7 7 0 0 1 0 13.4v2.1a9 9 0 0 0 0-17.6z"/></svg>';
  const CONTROLS='a.brandline,.topnav a,a.btn,a.card-revise,a.card-quiz,a.side-link,button.btn,button.hindi-key,button.hindi-pad-tab,button.hindi-pad-action,button.hindi-pad-toggle,button.word-tile,button.category-tile,button.category-heading';
@@ -1341,6 +1342,10 @@ if(restore()){
  const packs={};
  let ortReady=null, ipaReady=null;
  function voice(){try{return localStorage.getItem(KEY)==='male'?'male':'female'}catch{return 'female'}}
+ function packFor(text){
+  if(voice()!=='male')return 'female';
+  return /\s/.test(text)?'male':'maleWord';
+ }
  function rate(){const raw=localStorage.getItem(RATE_KEY);const n=Number(raw);if(raw==null||!Number.isFinite(n))return 1;return Math.min(1.5,Math.max(0.6,n))}
  function status(text){const msg=text||'';const el=document.getElementById('audioStatus');if(el)el.textContent=msg;const vis=document.getElementById('speakStatus');if(vis)vis.textContent=msg}
  function hindiOf(text){return ((text||'').match(/[\u0900-\u097F][\u0900-\u097F\u0964\u0965\s'’-]*/g)||[]).join(' ').replace(/\s+/g,' ').trim()}
@@ -1511,15 +1516,15 @@ if(restore()){
   if(cache){try{await cache.put(url,new Response(buf.slice(0)))}catch{}}
   return buf;
  }
- async function loadPack(gender){
-  if(packs[gender])return packs[gender];
-  packs[gender]=(async()=>{
+ async function loadPack(id){
+  if(packs[id])return packs[id];
+  packs[id]=(async()=>{
    const [ort,getPhonemes]=await Promise.all([loadOrt(),loadPhonemes()]);
-   const bytes=await modelBytes(VOICES[gender]);
+   const bytes=await modelBytes(VOICES[id]);
    const session=await ort.InferenceSession.create(bytes,{executionProviders:['wasm'],graphOptimizationLevel:'basic'});
    return {session,getPhonemes,sampleRate:22050};
-  })().catch(err=>{delete packs[gender];throw err});
-  return packs[gender];
+  })().catch(err=>{delete packs[id];throw err});
+  return packs[id];
  }
  async function speakClause(pack,ipa,speed){
   if(!ipa)return new Float32Array(0);
@@ -1557,16 +1562,16 @@ if(restore()){
   if(btn&&(btn.classList.contains('is-playing')||btn.classList.contains('is-loading'))){stop();status('Stopped.');return}
   stop();
   const myRun=++run;
-  const gender=voice();
+  const packId=packFor(text);
   const speed=rate();
   currentBtn=btn||null;currentHost=host||null;
   if(btn){btn.classList.add('is-loading');btn.setAttribute('aria-busy','true')}
   host?.classList.add('is-sounding');
   if(!ctx||ctx.state==='closed')ctx=new AudioContext();
   ctx.resume();
-  status('Loading the '+gender+' Hindi voice. The first time for this voice downloads about 70 MB.');
+  status('Loading the '+(packId==='female'?'female':'male')+' Hindi voice. The first time for this voice downloads about 70 MB.');
   let pack=null;
-  try{pack=await loadPack(gender)}catch{
+  try{pack=await loadPack(packId)}catch{
    if(myRun!==run)return;
    stop();status('The Hindi voice could not be loaded.');return;
   }
