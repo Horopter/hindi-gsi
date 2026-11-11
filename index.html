@@ -174,10 +174,15 @@ for(let n=1;n<=30;n++){
  m('numbers',`Choose the Hindi word for ${n}.`,nums[n],candidates,`${n} is written ${nums[n]}.`,1,'numbers');
  if(n%2===0||n===1||n===25)t('numbers',`Write ${n} in Hindi words.`,numsAlt[n]||[nums[n]],`${n} = ${nums[n]}.`,2,'numbers');
 }
+const tens=[['40','चालीस'],['50','पचास'],['60','साठ'],['70','सत्तर'],['80','अस्सी'],['90','नब्बे'],['100','सौ']];
+tens.forEach(([n,hi],i)=>{
+ m('numbers',`Choose the Hindi word for ${n}.`,hi,rotatePick(tens.map(x=>x[1]),i),`${n} is written ${hi}.`,2,'numbers');
+ t('numbers',`Write ${n} in Hindi words.`,hi,`${n} = ${hi}.`,2,'numbers');
+});
 // 3. Colors.
 palette.forEach(([hi,en],i)=>{
  m('colors',`Choose the Hindi word for “${en}”.`,hi,rotatePick(palette.map(x=>x[0]),i),`The Hindi word for ${en} is ${hi}.`,1);
- if(i<8)t('colors',`Write the color “${en}” in Hindi.`,hi,`${en} = ${hi}.`,2);
+ if(i<8||i>=10)t('colors',`Write the color “${en}” in Hindi.`,hi,`${en} = ${hi}.`,2);
 });
 // 4. Fruits and vegetables.
 fruitVeg.forEach(([hi,en,kind],i)=>{
@@ -232,9 +237,18 @@ const adjQuestions=[
  ['एक ___ चाय। (sweet)','मीठी',['मीठा','मीठे','मीठों'],'चाय is feminine, so मीठी.'],
  ['एक ___ पानी। (cold)','ठंडा',['ठंडी','ठंडे','ठंडों'],'पानी is masculine singular, so ठंडा.'],
  ['एक ___ किताब। (dirty)','गंदी',['गंदा','गंदे','गंदों'],'किताब is feminine, so गंदी.'],
- ['यह ___ काम है। (easy)','आसान',['आसानी','आसाने','आसाना'],'आसान is indeclinable and does not change for gender or number.']
+ ['यह ___ काम है। (easy)','आसान',['आसानी','आसाने','आसाना'],'आसान is indeclinable and does not change for gender or number.'],
+ ['एक ___ किताब। (dark)','गहरी',['गहरा','गहरे','गहरों'],'किताब is feminine, so गहरा becomes गहरी.'],
+ ['एक ___ घर। (dark)','गहरा',['गहरी','गहरे','गहरों'],'घर is masculine singular, so गहरा.'],
+ ['एक ___ साड़ी। (light)','हल्की',['हल्का','हल्के','हल्कों'],'साड़ी is feminine, so हल्की.'],
+ ['एक ___ अंगूठी। (golden)','सुनहरी',['सुनहरा','सुनहरे','सुनहरों'],'अंगूठी is feminine, so सुनहरी.'],
+ ['एक ___ कमीज़। (grey)','स्लेटी',['स्लेटा','स्लेटे','स्लेटीं'],'स्लेटी usually does not change for gender or number.'],
+ ['एक ___ नीबू। (sour)','खट्टा',['खट्टी','खट्टे','खट्टों'],'नीबू is masculine singular, so खट्टा.'],
+ ['एक ___ चटनी। (sour)','खट्टी',['खट्टा','खट्टे','खट्टों'],'चटनी is feminine, so खट्टी.'],
+ ['एक ___ बस। (slow)','धीमी',['धीमा','धीमे','धीमों'],'बस is feminine, so धीमी.'],
+ ['यह ___ किताब है। (difficult)','मुश्किल',['मुश्किला','मुश्किली','मुश्किलें'],'मुश्किल is indeclinable and does not change.']
 ];
-adjQuestions.forEach(([prompt,answer,wrong,why],i)=>{m('adjectives',`Complete the phrase: ${prompt}`,answer,wrong,why,2);if(i<10)t('adjectives',`Fill the adjective in Hindi: ${prompt}`,answer,why,2)});
+adjQuestions.forEach(([prompt,answer,wrong,why],i)=>{m('adjectives',`Complete the phrase: ${prompt}`,answer,wrong,why,2);if(i<10||i>=15)t('adjectives',`Fill the adjective in Hindi: ${prompt}`,answer,why,2)});
 // 7. Personal pronouns, demonstratives and possessives.
 PRONOUNS.forEach((p,i)=>{
  m('pronouns',`Choose the auxiliary in: “${p.p} ___।”`,p.aux,['हूँ','है','हो','हैं'].filter(x=>x!==p.aux).slice(0,3),`${p.p} pairs with ${p.aux} in these present-tense sentences.`,1);
@@ -263,7 +277,11 @@ demo.forEach(([direct,oblique,desc],i)=>{
  ['यह ___ घर है। (my)','मेरा',['मेरी','मेरे','मैं'],'घर is masculine singular.'],
  ['ये ___ कमरे हैं। (my)','मेरे',['मेरा','मेरी','मुझ'],'Masculine plural कमरे agrees with मेरे.'],
  ['यह ___ किताब है। (his/her)','उसकी',['उसका','उसके','उस'],'किताब is feminine; उसकी agrees with the noun.'],
- ['यह ___ घर है। (his/her)','उसका',['उसकी','उसके','उनकी'],'घर is masculine singular; उसका agrees with it.']
+ ['यह ___ घर है। (his/her)','उसका',['उसकी','उसके','उनकी'],'घर is masculine singular; उसका agrees with it.'],
+ ['यह ___ भाई है। (my)','मेरा',['मेरी','मेरे','मैं'],'भाई is masculine singular, so मेरा.'],
+ ['यह ___ बहन है। (my)','मेरी',['मेरा','मेरे','मुझ'],'बहन is feminine, so मेरी.'],
+ ['यह ___ सहेली है। (my)','मेरी',['मेरा','मेरे','मैं'],'सहेली is feminine, so मेरी.'],
+ ['यह ___ गाड़ी है। (his/her)','उसकी',['उसका','उसके','उनकी'],'गाड़ी is feminine, so उसकी.']
 ].forEach(([q,a,w,why])=>m('pronouns',`Fill the blank: ${q}`,a,w,why,2));
 // 8. Postpositions in context: one intended relationship per question.
 const postItems=[
@@ -278,7 +296,13 @@ const postItems=[
  ['The color of the book: किताब ___ रंग','का',['की','के','को'],'रंग is masculine singular, so किताब का रंग.'],
  ['The door of the house: घर ___ दरवाज़ा','का',['की','के','को'],'दरवाज़ा is masculine singular.'],
  ['The key of the house: घर ___ चाबी','की',['का','के','को'],'चाबी is feminine singular.'],
- ['The rooms of the house: घर ___ कमरे','के',['का','की','को'],'कमरे is masculine plural.']
+ ['The rooms of the house: घर ___ कमरे','के',['का','की','को'],'कमरे is masculine plural.'],
+ ['The book is inside the bag: किताब बैग ___ है।','के अंदर',['के बाहर','पर','से'],'के अंदर means inside.'],
+ ['The children play outside the school: बच्चे स्कूल ___ खेलते हैं।','के बाहर',['के अंदर','में','के पास'],'के बाहर means outside.'],
+ ['The bag is on top of the table: बैग मेज़ ___ है।','के ऊपर',['के नीचे','के अंदर','से'],'के ऊपर means above or on top of.'],
+ ['The cat is under the table: बिल्ली मेज़ ___ है।','के नीचे',['के ऊपर','के अंदर','पर'],'के नीचे means under.'],
+ ['The tree is in front of the house: पेड़ घर ___ है।','के आगे',['के पीछे','के पास','में'],'के आगे means in front of.'],
+ ['The car is behind the house: गाड़ी घर ___ है।','के पीछे',['के आगे','के पास','से'],'के पीछे means behind.']
 ];
 postItems.forEach(([q,a,w,why],i)=>{m('postpositions',q,a,w,why,2);if(i%3===0)t('postpositions',`Fill the blank: ${q}`,a,why,2)});
 // 9. Present habitual: stem + ta/te/ti and auxiliary.
@@ -427,7 +451,7 @@ fill('demonstratives','Complete the near singular oblique phrase: ___ कित�
 fill('demonstratives','Complete the far plural oblique phrase: ___ बच्चों को (those children).','उन','वे → उन before a postposition.');
 for(const [cue,ans,why] of [['an unspecified book','एक किताब','एक may introduce an indefinite referent.'],['this particular book','यह किताब','यह specifies a near singular referent.'],['some book, unspecified','कोई किताब','कोई expresses an indefinite choice.']])fill('demonstratives',`Write the Hindi noun phrase for “${cue}”.`,ans,why);
 single('demonstratives','Hindi has the same obligatory definite article as English “the”. Is this accurate?','No: definiteness is often contextual',['Yes: यह is always obligatory','Yes: एक always means “the”','Yes: को marks every definite noun'],'Hindi has no obligatory article corresponding to English “the”.');
-[['लड़का','लड़के से'],['लड़की','लड़की से'],['लड़कियाँ','लड़कियों से']].forEach(([base,form])=>fill('postpositions',`Write the phrase with से: ${base} → ___`,form,`The noun uses its oblique form where required: ${form}.`));
+[['लड़का','लड़के से'],['लड़की','लड़की से'],['लड़कियाँ','लड़कियों से'],['औरत','औरत से'],['औरतें','औरतों से'],['गाड़ी','गाड़ी से'],['गाड़ियाँ','गाड़ियों से'],['बहनें','बहनों से'],['पेड़ (plural)','पेड़ों से']].forEach(([base,form])=>fill('postpositions',`Write the phrase with से: ${base} → ___`,form,`The noun uses its oblique form where required: ${form}.`));
 const REGISTERS=[['जाना','जा','जाओ','जाइए'],['करना','कर','करो','कीजिए'],['देना','दे','दो','दीजिए'],['खाना','खा','खाओ','खाइए'],['बैठना','बैठ','बैठो','बैठिए'],['देखना','देख','देखो','देखिए'],['पढ़ना','पढ़','पढ़ो','पढ़िए'],['आना','आ','आओ','आइए'],['लेना','ले','लो','लीजिए'],['लाना','ला','लाओ','लाइए'],['गाना','गा','गाओ','गाइए'],['बताना','बता','बताओ','बताइए'],['सीखना','सीख','सीखो','सीखिए'],['खरीदना','खरीद','खरीदो','खरीदिए']];
 REGISTERS.forEach(([v,tu,tum,aap],i)=>{
  fill('imperatives',`Give the respectful आप command: ${v} → ___`,aap,`Respectful: ${aap}.`);
@@ -435,21 +459,21 @@ REGISTERS.forEach(([v,tu,tum,aap],i)=>{
 });
 const matchingPools={
 script:[['आ','ा'],['इ','ि'],['ई','ी'],['उ','ु'],['ऊ','ू'],['ए','े'],['ऐ','ै'],['ओ','ो'],['औ','ौ'],['ऋ','ृ'],['क','/k/'],['ख','/kh/'],['ग','/g/'],['घ','/gh/'],['च','/ch/'],['ज','/j/']],
-numbers:nums.slice(1).map((hi,i)=>[String(i+1),hi]),
+numbers:[...nums.slice(1).map((hi,i)=>[String(i+1),hi]),['40','चालीस'],['50','पचास'],['60','साठ'],['70','सत्तर'],['80','अस्सी'],['90','नब्बे'],['100','सौ']],
 colors:palette.map(([hi,en])=>[hi,en]),
 foods:fruitVeg.map(([hi,en])=>[hi,en]),
 nouns:CASES.map(([s,os,dp,op])=>[dp,op]),
-adjectives:[['अच्छा लड़का','good boy'],['अच्छी लड़की','good girl'],['अच्छे लड़के','good boys'],['नीली किताब','blue book'],['नीले कमरे','blue rooms'],['छोटी कुर्सी','small chair'],['बड़ा घर','big house'],['नई किताबें','new books'],['लंबा लड़का','tall boy'],['लंबी लड़की','tall girl'],['मीठा आम','sweet mango'],['मीठी चाय','sweet tea'],['ठंडा पानी','cold water'],['गरम चाय','hot tea'],['आसान काम','easy work'],['गंदी किताब','dirty book']],
+adjectives:[['अच्छा लड़का','good boy'],['अच्छी लड़की','good girl'],['अच्छे लड़के','good boys'],['नीली किताब','blue book'],['नीले कमरे','blue rooms'],['छोटी कुर्सी','small chair'],['बड़ा घर','big house'],['नई किताबें','new books'],['लंबा लड़का','tall boy'],['लंबी लड़की','tall girl'],['मीठा आम','sweet mango'],['मीठी चाय','sweet tea'],['ठंडा पानी','cold water'],['गरम चाय','hot tea'],['आसान काम','easy work'],['गंदी किताब','dirty book'],['खट्टा नीबू','sour lemon'],['धीमी बस','slow bus'],['मुश्किल काम','difficult work'],['सुनहरी अंगूठी','gold ring']],
 pronouns:[['मैं','I'],['हम','we'],['तू','very intimate you'],['तुम','familiar you'],['आप','respectful you'],['वह','he, she or that'],['वे','they']],
 demonstratives:[['यह','इस'],['वह','उस'],['ये','इन'],['वे','उन'],['मेरा','masculine singular possessed noun'],['मेरी','feminine possessed noun'],['मेरे','masculine plural possessed noun'],['कोई','indefinite choice']],
-postpositions:[['में','in'],['पर','on'],['से','from'],['को','object/recipient marker'],['के पास','near'],['के साथ','with'],['तक','until'],['के लिए','for']],
+postpositions:[['में','in'],['पर','on'],['से','from'],['को','object/recipient marker'],['के पास','near'],['के साथ','with'],['तक','until'],['के लिए','for'],['के अंदर','inside'],['के बाहर','outside'],['के ऊपर','above'],['के नीचे','under'],['के आगे','in front of'],['के पीछे','behind']],
 habitual:[['मैं जाता हूँ','male I go'],['मैं जाती हूँ','female I go'],['तुम जाते हो','familiar male you go'],['तुम जाती हो','familiar female you go'],['वह जाता है','he goes'],['वह जाती है','she goes'],['हम जाते हैं','we go, masculine or mixed'],['हम जाती हैं','we go, all feminine']],
 imperatives:REGISTERS.map(([v,tu,tum,aap])=>[v,aap]),
 shopping:fractions.map(([hi,en])=>[hi,en]),
-routines:[['पहले','first'],['फिर','then'],['उसके बाद','after that'],['आमतौर पर','usually'],['रोज़ाना','daily'],['नाश्ता','breakfast'],['आराम करना','to rest'],['घर वापस आना','return home']],
+routines:[['पहले','first'],['फिर','then'],['उसके बाद','after that'],['आमतौर पर','usually'],['रोज़ाना','daily'],['नाश्ता','breakfast'],['आराम करना','to rest'],['घर वापस आना','return home'],['दोपहर','noon'],['चाय पीना','to drink tea'],['नहाना','to bathe'],['जल्दी','early']],
 time:timeItems.map(([a,b])=>[a,b]),
-future:[['जाना','जाऊँगा'],['देना','दूँगा'],['करना','करूँगा'],['खाना','खाऊँगा'],['पढ़ना','पढ़ूँगा'],['लिखना','लिखूँगा'],['देखना','देखूँगा'],['पीना','पिऊँगा'],['सोना','सोऊँगा']],
-sentences:[['I go to school (male).','मैं स्कूल जाता हूँ।'],['She reads a book.','वह किताब पढ़ती है।'],['We will go (male group).','हम जाएँगे।'],['I will give (female).','मैं दूँगी।'],['You go (respectful, male).','आप जाते हैं।'],['Please give two apples.','दो सेब दीजिए।'],['The blue book is here.','नीली किताब यहाँ है।'],['They play (male group).','वे खेलते हैं।']]
+future:[['जाना','जाऊँगा'],['देना','दूँगा'],['करना','करूँगा'],['खाना','खाऊँगा'],['पढ़ना','पढ़ूँगा'],['लिखना','लिखूँगा'],['देखना','देखूँगा'],['पीना','पिऊँगा'],['सोना','सोऊँगा'],['आना','आऊँगा'],['लेना','लूँगा'],['लाना','लाऊँगा'],['गाना','गाऊँगा'],['बताना','बताऊँगा'],['बैठना','बैठूँगा'],['सीखना','सीखूँगा']],
+sentences:[['I go to school (male).','मैं स्कूल जाता हूँ।'],['She reads a book.','वह किताब पढ़ती है।'],['We will go (male group).','हम जाएँगे।'],['I will give (female).','मैं दूँगी।'],['You go (respectful, male).','आप जाते हैं।'],['Please give two apples.','दो सेब दीजिए।'],['The blue book is here.','नीली किताब यहाँ है।'],['They play (male group).','वे खेलते हैं।'],['The tall girl reads.','लंबी लड़की पढ़ती है।'],['I will bring mangoes (male).','मैं आम लाऊँगा।'],['Please sit (respectful).','आप बैठिए।'],['This lemon is sour.','यह नीबू खट्टा है।']]
 };
 Object.entries(matchingPools).forEach(([cat,arr])=>{for(let i=0;i+3<arr.length;i+=4)matching(cat,`Match the following (${cat}).`,arr.slice(i,i+4),'Match each item with its corresponding form or meaning.');});
 const MULTI=[
@@ -484,7 +508,19 @@ const MULTI=[
 ['future','Select all standard future stem forms of देना before adding गा, गे, or गी.',['दूँ','दो','दें','देऊँ'],['दूँ','दो','दें'],'देऊँ is not the standard stem in this paradigm.'],
 ['future','Select all correct future forms.',['मैं जाऊँगी।','तुम दोगे।','आप पढ़ेंगे।','वह करूँगा।'],['मैं जाऊँगी।','तुम दोगे।','आप पढ़ेंगे।'],'वह requires करेगा or करेगी.'],
 ['sentences','Select all grammatically correct complete sentences.',['मैं शहर में रहता हूँ।','वह चाय पीती है।','ये मेरी किताबें हैं।','आप स्कूल जाता है।'],['मैं शहर में रहता हूँ।','वह चाय पीती है।','ये मेरी किताबें हैं।'],'आप requires plural verbal agreement.'],
-['sentences','Select all correct future-tense sentences.',['मैं दूँगा।','वह जाएगी।','हम खेलेंगे।','तुम जाएगा।'],['मैं दूँगा।','वह जाएगी।','हम खेलेंगे।'],'तुम requires जाओगे or जाओगी.']
+['sentences','Select all correct future-tense sentences.',['मैं दूँगा।','वह जाएगी।','हम खेलेंगे।','तुम जाएगा।'],['मैं दूँगा।','वह जाएगी।','हम खेलेंगे।'],'तुम requires जाओगे or जाओगी.'],
+['numbers','Select all Hindi words for numbers greater than thirty.',['चालीस','पचास','तीस','सौ'],['चालीस','पचास','सौ'],'तीस is thirty. चालीस is 40, पचास is 50, and सौ is 100.'],
+['colors','Select all color words that change for gender.',['गहरा','हल्का','सुनहरा','स्लेटी'],['गहरा','हल्का','सुनहरा'],'स्लेटी usually stays the same; गहरा, हल्का, and सुनहरा change.'],
+['foods','Select all fruits.',['नारियल','तरबूज़','गोभी','नीबू'],['नारियल','तरबूज़','नीबू'],'गोभी is cabbage, a vegetable.'],
+['foods','Select all vegetables.',['मूली','अदरक','लीची','मिर्च'],['मूली','अदरक','मिर्च'],'लीची is a fruit.'],
+['adjectives','Select all correctly agreed phrases.',['खट्टा नीबू','खट्टी चटनी','धीमी बस','खट्टी नीबू'],['खट्टा नीबू','खट्टी चटनी','धीमी बस'],'नीबू is masculine, so खट्टा नीबू.'],
+['nouns','Select all correct oblique plural forms of the added nouns.',['औरतों','गाड़ियों','बहनों','औरतें'],['औरतों','गाड़ियों','बहनों'],'औरतें is a direct plural, not an oblique plural.'],
+['postpositions','Select all phrases for a place around the house.',['घर के बाहर','घर के पीछे','घर के आगे','घर से'],['घर के बाहर','घर के पीछे','घर के आगे'],'से marks a source here, not one of these location phrases.'],
+['habitual','Select all correct sentences with the added verbs.',['मैं आता हूँ।','वह गाती है।','तुम खरीदते हो।','मैं आती है।'],['मैं आता हूँ।','वह गाती है।','तुम खरीदते हो।'],'मैं requires हूँ.'],
+['imperatives','Select all respectful commands of the added verbs.',['आइए','लाइए','बताइए','आओ'],['आइए','लाइए','बताइए'],'आओ is the familiar तुम command of आना.'],
+['future','Select all correct masculine future forms.',['मैं आऊँगा','मैं लाऊँगा','वह गाएगा','मैं लेऊँगा'],['मैं आऊँगा','मैं लाऊँगा','वह गाएगा'],'लेना uses लूँगा, not लेऊँगा.'],
+['shopping','Select all shopping phrases from the added expressions.',['ये आम ताज़ा हैं।','और क्या चाहिए?','बाकी पैसे लौटाइए।','तू आम खाता है।'],['ये आम ताज़ा हैं।','और क्या चाहिए?','बाकी पैसे लौटाइए।'],'The last is not a shopping request.'],
+['time','Select all quarter-past times.',['सवा चार बजे','सवा आठ बजे','साढ़े चार बजे','पौने बारह बजे'],['सवा चार बजे','सवा आठ बजे'],'सवा is quarter past. साढ़े is half past, and पौने is quarter to.']
 ];
 MULTI.forEach(([cat,p,c,a,w])=>multi(cat,p,c,a,w));
 // Answer normalization and structural quality checks.
@@ -625,20 +661,20 @@ catQuestion('numbers','Sort the Hindi numbers into odd and even.',['Odd · व�
 ['तीन','Odd · विषम'],['आठ','Even · सम'],['ग्यारह','Odd · विषम'],['बारह','Even · सम'],['पंद्रह','Odd · विषम'],['बीस','Even · सम'],['इक्कीस','Odd · विषम'],['तीस','Even · सम']],
 'Odd numbers cannot be divided evenly into two groups; even numbers can.');
 catQuestion('colors','Sort color adjectives by whether they change with gender.',['Changing adjective','Unchanging adjective'],[
-['नीला','Changing adjective'],['पीला','Changing adjective'],['हरा','Changing adjective'],['काला','Changing adjective'],['लाल','Unchanging adjective'],['गुलाबी','Unchanging adjective'],['बैंगनी','Unchanging adjective'],['सफ़ेद','Unchanging adjective']],
+['नीला','Changing adjective'],['पीला','Changing adjective'],['हरा','Changing adjective'],['काला','Changing adjective'],['गहरा','Changing adjective'],['सुनहरा','Changing adjective'],['लाल','Unchanging adjective'],['गुलाबी','Unchanging adjective'],['बैंगनी','Unchanging adjective'],['सफ़ेद','Unchanging adjective'],['स्लेटी','Unchanging adjective'],['आसमानी','Unchanging adjective']],
 'Colors ending in आ typically inflect; लाल, गुलाबी, बैंगनी and सफ़ेद do not follow that pattern.');
 catQuestion('foods','Put each item in the correct food category.',['फल · Fruits','सब्ज़ियाँ · Vegetables'],[
-['आम','फल · Fruits','food:mango'],['केला','फल · Fruits','food:banana'],['सेब','फल · Fruits','food:apple'],['अनार','फल · Fruits','food:pomegranate'],
-['आलू','सब्ज़ियाँ · Vegetables','food:potato'],['गाजर','सब्ज़ियाँ · Vegetables','food:carrot'],['बैंगन','सब्ज़ियाँ · Vegetables','food:eggplant'],['भिंडी','सब्ज़ियाँ · Vegetables','food:okra']],
+['आम','फल · Fruits','food:mango'],['केला','फल · Fruits','food:banana'],['सेब','फल · Fruits','food:apple'],['अनार','फल · Fruits','food:pomegranate'],['नारियल','फल · Fruits'],['नीबू','फल · Fruits'],['लीची','फल · Fruits'],
+['आलू','सब्ज़ियाँ · Vegetables','food:potato'],['गाजर','सब्ज़ियाँ · Vegetables','food:carrot'],['बैंगन','सब्ज़ियाँ · Vegetables','food:eggplant'],['भिंडी','सब्ज़ियाँ · Vegetables','food:okra'],['गोभी','सब्ज़ियाँ · Vegetables'],['मूली','सब्ज़ियाँ · Vegetables'],['मिर्च','सब्ज़ियाँ · Vegetables']],
 'The fruits and vegetables are separated according to the course vocabulary groups.');
 catQuestion('nouns','Sort the nouns by grammatical gender.',['Masculine','Feminine'],[
-['लड़का','Masculine'],['कमरा','Masculine'],['घर','Masculine'],['केला','Masculine'],['किताब','Feminine'],['लड़की','Feminine'],['कुर्सी','Feminine'],['रोटी','Feminine']],
+['लड़का','Masculine'],['कमरा','Masculine'],['घर','Masculine'],['केला','Masculine'],['आदमी','Masculine'],['पेड़','Masculine'],['किताब','Feminine'],['लड़की','Feminine'],['कुर्सी','Feminine'],['रोटी','Feminine'],['औरत','Feminine'],['गाड़ी','Feminine']],
 'The grammatical gender of a noun governs agreement, even when the noun refers to an object.');
 catQuestion('nouns','Sort these plural noun forms by case.',['Direct plural','Oblique plural'],[
 ['किताबें','Direct plural'],['कमरे','Direct plural'],['लड़कियाँ','Direct plural'],['कुर्सियाँ','Direct plural'],['किताबों से','Oblique plural'],['कमरों में','Oblique plural'],['लड़कियों को','Oblique plural'],['कुर्सियों पर','Oblique plural']],
 'Postpositions such as से, को, में and पर take oblique plural noun forms.');
 catQuestion('adjectives','Sort the adjective phrases by gender and number.',['Masculine singular','Masculine plural','Feminine'],[
-['बड़ा कमरा','Masculine singular'],['नीला घर','Masculine singular'],['बड़े कमरे','Masculine plural'],['नीले घर','Masculine plural'],['बड़ी किताब','Feminine'],['नीली कुर्सी','Feminine']],
+['बड़ा कमरा','Masculine singular'],['नीला घर','Masculine singular'],['लंबा लड़का','Masculine singular'],['खट्टा नीबू','Masculine singular'],['बड़े कमरे','Masculine plural'],['नीले घर','Masculine plural'],['लंबे लड़के','Masculine plural'],['बड़ी किताब','Feminine'],['नीली कुर्सी','Feminine'],['लंबी लड़की','Feminine'],['मीठी चाय','Feminine'],['धीमी बस','Feminine']],
 'आ-ending adjectives normally have आ, ए or ई according to gender, number and case.');
 catQuestion('pronouns','Sort the forms of “you” by social register.',['Intimate · तू','Familiar · तुम','Respectful · आप'],[
 ['तू','Intimate · तू'],['तू जाता है','Intimate · तू'],['तुम','Familiar · तुम'],['तुम जाते हो','Familiar · तुम'],['आप','Respectful · आप'],['आप जाते हैं','Respectful · आप']],
@@ -647,16 +683,16 @@ catQuestion('demonstratives','Sort the demonstratives by near versus far referen
 ['यह','Near'],['ये','Near'],['इस','Near'],['इन','Near'],['वह','Far'],['वे','Far'],['उस','Far'],['उन','Far']],
 'यह/ये/इस/इन indicate near reference; वह/वे/उस/उन indicate more distant reference.');
 catQuestion('postpositions','Sort phrases by their expressed relation.',['Location','Source','Recipient'],[
-['शहर में','Location'],['मेज़ पर','Location'],['स्कूल से','Source'],['घर से','Source'],['राम को','Recipient'],['बच्चे को','Recipient']],
+['शहर में','Location'],['मेज़ पर','Location'],['कमरे के अंदर','Location'],['मेज़ के नीचे','Location'],['स्कूल के बाहर','Location'],['स्कूल से','Source'],['घर से','Source'],['राम को','Recipient'],['बच्चे को','Recipient']],
 'में and पर specify location, से here shows a source, and को marks a recipient.');
 catQuestion('habitual','Sort habitual verb phrases by the subject’s gender.',['Masculine subject','Feminine subject'],[
 ['मैं जाता हूँ','Masculine subject'],['तुम पढ़ते हो','Masculine subject'],['वे खेलते हैं','Masculine subject'],['हम आते हैं','Masculine subject'],['मैं जाती हूँ','Feminine subject'],['तुम पढ़ती हो','Feminine subject'],['वे खेलती हैं','Feminine subject'],['हम आती हैं','Feminine subject']],
 'The habitual participle is ता/ते for masculine forms and ती for feminine forms.');
 catQuestion('imperatives','Sort commands by the addressee.',['Intimate · तू','Familiar · तुम','Respectful · आप'],[
-['जा','Intimate · तू'],['कर','Intimate · तू'],['जाओ','Familiar · तुम'],['करो','Familiar · तुम'],['जाइए','Respectful · आप'],['कीजिए','Respectful · आप']],
+['जा','Intimate · तू'],['कर','Intimate · तू'],['आ','Intimate · तू'],['जाओ','Familiar · तुम'],['करो','Familiar · तुम'],['लाओ','Familiar · तुम'],['जाइए','Respectful · आप'],['कीजिए','Respectful · आप'],['लाइए','Respectful · आप']],
 'Imperatives change with the social register: तू, तुम and आप.');
 catQuestion('future','Sort these future forms by gender.',['Masculine','Feminine'],[
-['मैं जाऊँगा','Masculine'],['तुम दोगे','Masculine'],['वह करेगा','Masculine'],['हम पढ़ेंगे','Masculine'],['मैं जाऊँगी','Feminine'],['तुम दोगी','Feminine'],['वह करेगी','Feminine'],['हम पढ़ेंगी','Feminine']],
+['मैं जाऊँगा','Masculine'],['तुम दोगे','Masculine'],['वह करेगा','Masculine'],['हम पढ़ेंगे','Masculine'],['मैं आऊँगा','Masculine'],['मैं लाऊँगा','Masculine'],['मैं जाऊँगी','Feminine'],['तुम दोगी','Feminine'],['वह करेगी','Feminine'],['हम पढ़ेंगी','Feminine'],['मैं आऊँगी','Feminine'],['मैं लाऊँगी','Feminine']],
 'गा and गे mark masculine future patterns; गी marks feminine future patterns.');
 catQuestion('shopping','Sort the fractional quantities.',['Less than 1 kg','More than 1 kg'],[
 ['आधा किलो','Less than 1 kg'],['एक चौथाई किलो','Less than 1 kg'],['तीन चौथाई किलो','Less than 1 kg'],['सवा किलो','More than 1 kg'],['डेढ़ किलो','More than 1 kg'],['पौने दो किलो','More than 1 kg']],
