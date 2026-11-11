@@ -754,7 +754,7 @@ window.HindiRevisions={
 script:`
 <h2>देवनागरी · वर्णमाला</h2>
 <h3>स्वर · Independent vowels and matras</h3>
-<div class="sound-vowels">${[['अ','—','/a/','क'],['आ','ा','/aa/','का'],['इ','ि','/i/','कि'],['ई','ी','/ii/','की'],['उ','ु','/u/','कु'],['ऊ','ू','/uu/','कू'],['ऋ','ृ','/ri/','कृ'],['ए','े','/e/','के'],['ऐ','ै','/ai/','कै'],['ओ','ो','/o/','को'],['औ','ौ','/au/','कौ']].map(([v,m,ph,ex])=>`<div class="sound-vowel"><strong>${v}</strong><span class="sound-code">${ph}</span><span class="sign">${m==='—'?'no matra':'◌'+m}</span><small>${ex}</small></div>`).join('')}</div>
+<div class="sound-vowels">${[['अ','—','/a/','क'],['आ','ा','/aa/','का'],['इ','ि','/i/','कि'],['ई','ी','/ii/','की'],['उ','ु','/u/','कु'],['ऊ','ू','/uu/','कू'],['ऋ','ृ','/ri/','कृ'],['ए','े','/e/','के'],['ऐ','ै','/ai/','कै'],['ओ','ो','/o/','को'],['औ','ौ','/au/','कौ'],['अं','ं','/am/','कं'],['अः','ः','/ah/','कः']].map(([v,m,ph,ex])=>`<div class="sound-vowel" data-say="${v}"><strong>${v}</strong><span class="sound-code">${ph}</span><span class="sign">${m==='—'?'no matra':'◌'+m}</span><small>${ex}</small></div>`).join('')}</div>
 
 <h3>व्यंजन · 5 × 5 consonant matrix</h3>
 
@@ -769,7 +769,7 @@ script:`
 <div class="sound-vowels compact-sounds">${[['य','/y/'],['र','/r/'],['ल','/l/'],['व','/v/'],['श','/sh/'],['ष','/Sh/'],['स','/s/'],['ह','/h/'],['ड़','/R/'],['ढ़','/Rh/'],['फ़','/f/']].map(([a,p])=>`<div class="sound-vowel"><strong>${a}</strong><span class="sound-code">${p}</span></div>`).join('')}</div>
 
 <h3>संयुक्ताक्षर · Conjunct consonants</h3>
-<div class="conjunct-grid">${[['क् + ष','क्ष','/ksh/'],['त् + र','त्र','/tr/'],['ज् + ञ','ज्ञ','/gy/'],['श् + र','श्र','/shr/'],['क् + र','क्र','/kr/'],['प् + र','प्र','/pr/'],['स् + त','स्त','/st/'],['क् + त','क्त','/kt/'],['द् + य','द्य','/dy/'],['द् + व','द्व','/dv/'],['ग् + र','ग्र','/gr/'],['स् + क','स्क','/sk/']].map(([a,b,c])=>`<div class="conjunct-card"><small>${a}</small><strong>${b}</strong><span class="sound-code">${c}</span></div>`).join('')}</div>
+<div class="conjunct-grid">${[['क् + ष','क्ष','/ksh/'],['त् + र','त्र','/tr/'],['ज् + ञ','ज्ञ','/gy/'],['श् + र','श्र','/shr/'],['क् + र','क्र','/kr/'],['प् + र','प्र','/pr/'],['स् + त','स्त','/st/'],['क् + त','क्त','/kt/'],['द् + य','द्य','/dy/'],['द् + व','द्व','/dv/'],['ग् + र','ग्र','/gr/'],['स् + क','स्क','/sk/']].map(([a,b,c])=>`<div class="conjunct-card" data-say="${b}"><small>${a}</small><strong>${b}</strong><span class="sound-code">${c}</span></div>`).join('')}</div>
 <h3>Signs and word building</h3>
 <div class="example-set"><p>अनुस्वार <strong>◌ं</strong>, चंद्रबिंदु <strong>◌ँ</strong>, विसर्ग <strong>◌ः</strong>, नुक़्ता <strong>◌़</strong>, हलंत <strong>◌्</strong></p><p>क + ि + त + ा + ब → <strong>किताब</strong></p><p>प + ा + न + ी → <strong>पानी</strong></p><p>ल + ड़ + क + ा → <strong>लड़का</strong></p><p>ल + ड़ + क + ी → <strong>लड़की</strong></p><p>अ + च्छ + ा → <strong>अच्छा</strong></p><p>प + ढ़ + न + ा → <strong>पढ़ना</strong></p><p>आ + म → <strong>आम</strong> · फ + ू + ल → <strong>फूल</strong> · घ + र → <strong>घर</strong></p><p>श् + र = <strong>श्र</strong> · क् + ष = <strong>क्ष</strong></p></div>
 `,
@@ -997,7 +997,7 @@ function appendKeyboard(box){
  const panel=document.createElement('div');panel.className='hindi-pad-panel';
  let active='consonants';
  const other=[['य','/y/'],['र','/r/'],['ल','/l/'],['व','/v/'],['श','/sh/'],['ष','/Sh/'],['स','/s/'],['ह','/h/'],['ड़','/R/'],['ढ़','/Rh/'],['फ़','/f/']];
- const vowel=sounds.vSounds;
+ const vowel=[...sounds.vSounds,['अं','/am/'],['अः','/ah/']];
  const matras=[['ा','/aa/'],['ि','/i/'],['ी','/ii/'],['ु','/u/'],['ू','/uu/'],['ृ','/ri/'],['े','/e/'],['ै','/ai/'],['ो','/o/'],['ौ','/au/'],['ं','/am/'],['ँ','nasal'],['ः','/ah/'],['्','halant'],['़','nukta'],['।','stop']];
  const conjunct=[['क्ष','/ksh/'],['त्र','/tr/'],['ज्ञ','/gy/'],['श्र','/shr/'],['क्र','/kr/'],['प्र','/pr/'],['स्त','/st/'],['क्त','/kt/'],['द्य','/dy/'],['द्व','/dv/'],['ग्र','/gr/'],['स्क','/sk/']];
  const groups=[['consonants','व्यंजन · 5×5'],['vowels','स्वर'],['matras','मात्राएँ'],['conjunct','संयुक्ताक्षर']];
@@ -1302,6 +1302,12 @@ if(restore()){
  function rate(){const raw=localStorage.getItem(RATE_KEY);const n=Number(raw);if(raw==null||!Number.isFinite(n))return 1;return Math.min(1.5,Math.max(0.6,n))}
  function status(text){const msg=text||'';const el=document.getElementById('audioStatus');if(el)el.textContent=msg;const vis=document.getElementById('speakStatus');if(vis)vis.textContent=msg}
  function hindiOf(text){return ((text||'').match(/[\u0900-\u097F][\u0900-\u097F\u0964\u0965\s'’-]*/g)||[]).join(' ').replace(/\s+/g,' ').trim()}
+ function letterName(text){
+  const t=String(text||'').trim();
+  if(/^(?:[\u0915-\u0939\u0958-\u095F][\u093C]?(?:\u094D[\u0915-\u0939\u0958-\u095F][\u093C]?)*)$/.test(t))return t+'अ';
+  return t;
+ }
+ function sourceText(el){const say=el?.getAttribute?.('data-say');return say?say:plain(el)}
  function phonemeIds(ipa){
   const ids=[PHONEME_IDS['^'], PHONEME_IDS._];
   for(const ch of ipa){
@@ -1362,7 +1368,7 @@ if(restore()){
   btn.type='button';
   btn.className='say-btn';
   btn.innerHTML=SVG;
-  const name=hindiOf(plain(host)).slice(0,80)||'this Hindi text';
+  const name=hindiOf(sourceText(host)).slice(0,80)||'this Hindi text';
   btn.setAttribute('aria-label','Play '+name);
   return btn;
  }
@@ -1501,10 +1507,10 @@ if(restore()){
   return pcm;
  }
  async function play(btn){
-  return speak(plain(hostOf(btn)),btn,hostOf(btn));
+  return speak(sourceText(hostOf(btn)),btn,hostOf(btn));
  }
  async function speak(text,btn,host){
-  text=hindiOf(String(text||''));
+  text=letterName(hindiOf(String(text||'')));
   if(!text){status(btn&&btn.classList.contains('listen-btn')?'Type Hindi to listen.':'Nothing to play.');return}
   if(btn&&(btn.classList.contains('is-playing')||btn.classList.contains('is-loading'))){stop();status('Stopped.');return}
   stop();
