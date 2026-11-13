@@ -2210,6 +2210,7 @@ if(restore()){
  }
  let clipManifestPromise=null;
  let letterManifestPromise=null;
+ let elevenManifestPromise=null;
  function loadLetterManifest(){
   if(!letterManifestPromise){
    const ctrl=new AbortController();
@@ -2225,6 +2226,20 @@ if(restore()){
    clipManifestPromise=fetch('audio/cartesia/speech/manifest.json?v=speech',{signal:ctrl.signal}).then(r=>r.ok?r.json():null).catch(()=>null).finally(()=>clearTimeout(timer));
   }
   return clipManifestPromise;
+ }
+ function loadElevenManifest(){
+  if(!elevenManifestPromise){
+   const ctrl=new AbortController();
+   const timer=setTimeout(()=>ctrl.abort(),8000);
+   elevenManifestPromise=fetch('audio/elevenlabs/manifest.json?v=fallback',{signal:ctrl.signal}).then(r=>r.ok?r.json():null).catch(()=>null).finally(()=>clearTimeout(timer));
+  }
+  return elevenManifestPromise;
+ }
+ function looseClipUrl(manifest,text){
+  const direct=clipUrl(manifest,text);
+  if(direct)return direct;
+  const bare=text.replace(/[।॥\s]+$/g,'').trim();
+  return bare&&bare!==text?clipUrl(manifest,bare):'';
  }
  function clipUrl(manifest,text){
   const row=manifest?.clips?.[text];
@@ -2292,8 +2307,14 @@ if(restore()){
    const manifest=await loadClipManifest();
    if(myRun!==run)return;
    const key=clipLookupText(text);
-   const direct=isLetterName(key)?'':clipUrl(manifest,key);
-   const sequence=direct?null:wordClipUrls(manifest,key);
+   let direct=isLetterName(key)||bare?'':clipUrl(manifest,key);
+   let sequence=direct?null:wordClipUrls(manifest,key);
+   if(!direct&&!sequence&&!isLetterName(key)&&!bare){
+    const recorded=await loadElevenManifest();
+    if(myRun!==run)return;
+    direct=looseClipUrl(recorded,key);
+    sequence=direct?null:wordClipUrls(recorded,key);
+   }
    if(direct||sequence){
     if(btn){btn.classList.remove('is-loading');btn.classList.add('is-playing');btn.removeAttribute('aria-busy')}
     status('Playing.');
@@ -2335,7 +2356,7 @@ if(restore()){
  function mount(){
   if(decorating)return;
   decorating=true;
-  try{decorate(document);syncVoice();syncRate();loadLetterManifest();loadClipManifest()}finally{decorating=false}
+  try{decorate(document);syncVoice();syncRate();loadLetterManifest();loadClipManifest();loadElevenManifest()}finally{decorating=false}
  }
  document.addEventListener('pointerdown',ev=>{if(ev.target.closest('.say-btn'))ev.stopPropagation()},{capture:true});
  document.addEventListener('click',ev=>{
