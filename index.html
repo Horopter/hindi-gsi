@@ -2222,7 +2222,7 @@ if(restore()){
   if(!clipManifestPromise){
    const ctrl=new AbortController();
    const timer=setTimeout(()=>ctrl.abort(),8000);
-   clipManifestPromise=fetch('audio/elevenlabs/manifest.json',{signal:ctrl.signal}).then(r=>r.ok?r.json():null).catch(()=>null).finally(()=>clearTimeout(timer));
+   clipManifestPromise=fetch('audio/cartesia/speech/manifest.json?v=speech',{signal:ctrl.signal}).then(r=>r.ok?r.json():null).catch(()=>null).finally(()=>clearTimeout(timer));
   }
   return clipManifestPromise;
  }
