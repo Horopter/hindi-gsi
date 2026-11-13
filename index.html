@@ -2214,7 +2214,7 @@ if(restore()){
   if(!letterManifestPromise){
    const ctrl=new AbortController();
    const timer=setTimeout(()=>ctrl.abort(),8000);
-   letterManifestPromise=fetch('audio/cartesia/manifest.json',{signal:ctrl.signal}).then(r=>r.ok?r.json():null).catch(()=>null).finally(()=>clearTimeout(timer));
+   letterManifestPromise=fetch('audio/cartesia/manifest.json?v=4a1c62e',{signal:ctrl.signal}).then(r=>r.ok?r.json():null).catch(()=>null).finally(()=>clearTimeout(timer));
   }
   return letterManifestPromise;
  }
