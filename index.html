@@ -1998,6 +1998,12 @@ if(restore()){
   if(/^(?:अं|अः|अञ|अण|अंग|[अआइईउऊऋएऐओऔ])$/.test(t))return true;
   return /^(?:[\u0915-\u0939\u0958-\u095F][\u093C]?(?:\u094D[\u0915-\u0939\u0958-\u095F][\u093C]?)*)अ$/.test(t);
  }
+ function bareLetter(text){
+  const t=String(text||'').normalize('NFC').replace(/[\u200b-\u200d\ufeff]/g,'').trim();
+  if(/^(?:अं|अः|[अआइईउऊऋएऐओऔ])$/.test(t))return t;
+  if(/^(?:[\u0915-\u0939\u0958-\u095F][\u093C]?(?:\u094D[\u0915-\u0939\u0958-\u095F][\u093C]?)*)$/.test(t))return t;
+  return '';
+ }
  function sourceText(el){const say=el?.getAttribute?.('data-say');return say?say:plain(el)}
  function phonemeIds(ipa){
   const ids=[PHONEME_IDS['^'], PHONEME_IDS._];
@@ -2203,6 +2209,15 @@ if(restore()){
   return String(text||'').normalize('NFC').replace(/[\u200b-\u200d\ufeff]/g,'').replace(/\s+/g,' ').trim();
  }
  let clipManifestPromise=null;
+ let letterManifestPromise=null;
+ function loadLetterManifest(){
+  if(!letterManifestPromise){
+   const ctrl=new AbortController();
+   const timer=setTimeout(()=>ctrl.abort(),8000);
+   letterManifestPromise=fetch('audio/cartesia/manifest.json',{signal:ctrl.signal}).then(r=>r.ok?r.json():null).catch(()=>null).finally(()=>clearTimeout(timer));
+  }
+  return letterManifestPromise;
+ }
  function loadClipManifest(){
   if(!clipManifestPromise){
    const ctrl=new AbortController();
@@ -2246,7 +2261,9 @@ if(restore()){
   return speak(sourceText(hostOf(btn)),btn,hostOf(btn));
  }
  async function speak(text,btn,host){
-  text=letterName(hindiOf(String(text||'')));
+  const raw=hindiOf(String(text||''));
+  const bare=bareLetter(raw);
+  text=letterName(raw);
   if(!text){status(btn&&btn.classList.contains('listen-btn')?'Type Hindi to listen.':'Nothing to play.');return}
   if(btn&&(btn.classList.contains('is-playing')||btn.classList.contains('is-loading'))){stop();status('Stopped.');return}
   stop();
@@ -2258,6 +2275,20 @@ if(restore()){
   if(!ctx||ctx.state==='closed')ctx=new AudioContext();
   ctx.resume();
   try{
+   if(bare){
+    const letters=await loadLetterManifest();
+    if(myRun!==run)return;
+    const letterUrl=clipUrl(letters,bare);
+    if(letterUrl){
+     if(btn){btn.classList.remove('is-loading');btn.classList.add('is-playing');btn.removeAttribute('aria-busy')}
+     status('Playing.');
+     await playUrl(letterUrl,speed,myRun);
+     if(myRun!==run)return;
+     stop();
+     status('');
+     return;
+    }
+   }
    const manifest=await loadClipManifest();
    if(myRun!==run)return;
    const key=clipLookupText(text);
@@ -2304,7 +2335,7 @@ if(restore()){
  function mount(){
   if(decorating)return;
   decorating=true;
-  try{decorate(document);syncVoice();syncRate();loadClipManifest()}finally{decorating=false}
+  try{decorate(document);syncVoice();syncRate();loadLetterManifest();loadClipManifest()}finally{decorating=false}
  }
  document.addEventListener('pointerdown',ev=>{if(ev.target.closest('.say-btn'))ev.stopPropagation()},{capture:true});
  document.addEventListener('click',ev=>{
