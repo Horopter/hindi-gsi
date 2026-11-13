@@ -1,0 +1,6 @@
+secrets/
+.env
+.env.*
+*.key
+*.onnx
+.DS_Store
