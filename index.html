@@ -1993,6 +1993,11 @@ if(restore()){
   if(/^(?:[\u0915-\u0939\u0958-\u095F][\u093C]?(?:\u094D[\u0915-\u0939\u0958-\u095F][\u093C]?)*)$/.test(t))return t+'अ';
   return t;
  }
+ function isLetterName(text){
+  const t=String(text||'').normalize('NFC').replace(/[\u200b-\u200d\ufeff]/g,'').trim();
+  if(/^(?:अं|अः|अञ|अण|अंग|[अआइईउऊऋएऐओऔ])$/.test(t))return true;
+  return /^(?:[\u0915-\u0939\u0958-\u095F][\u093C]?(?:\u094D[\u0915-\u0939\u0958-\u095F][\u093C]?)*)अ$/.test(t);
+ }
  function sourceText(el){const say=el?.getAttribute?.('data-say');return say?say:plain(el)}
  function phonemeIds(ipa){
   const ids=[PHONEME_IDS['^'], PHONEME_IDS._];
@@ -2216,7 +2221,7 @@ if(restore()){
  function wordClipUrls(manifest,text){
   if(!/[\s।॥]/.test(text))return null;
   const parts=text.split(/[\s।॥]+/).map(part=>clipLookupText(letterName(part.trim()))).filter(Boolean);
-  if(parts.length<2)return null;
+  if(parts.length<2||parts.some(isLetterName))return null;
   const urls=parts.map(part=>clipUrl(manifest,part));
   if(urls.some(url=>!url))return null;
   return urls;
@@ -2256,7 +2261,7 @@ if(restore()){
    const manifest=await loadClipManifest();
    if(myRun!==run)return;
    const key=clipLookupText(text);
-   const direct=clipUrl(manifest,key);
+   const direct=isLetterName(key)?'':clipUrl(manifest,key);
    const sequence=direct?null:wordClipUrls(manifest,key);
    if(direct||sequence){
     if(btn){btn.classList.remove('is-loading');btn.classList.add('is-playing');btn.removeAttribute('aria-busy')}
